@@ -16,7 +16,7 @@ start C:\RTMPServer\nginx.exe -s stop
 
 user = os.envrion.get()
 startname = "C:\Users\" + user + "\Desktop\start.bat"
-stopname = "C:\Users\" + user + \Desktop\stop.bat"
+stopname = "C:\Users\" + user + "\Desktop\stop.bat"
 
 if os.name == "nt":
   DEFAULTDIR = "C:\RTMPServer\"
