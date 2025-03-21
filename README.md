@@ -1,6 +1,6 @@
 # RTMPServer
 An open-source server and installer for hosting rtmp server with nginx
-Note: Currently, this script only works in windows 7+
+### Note: Currently, this script only works in windows 7+
 
 # Requirements
 - Python 3 or higher
