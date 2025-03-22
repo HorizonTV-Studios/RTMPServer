@@ -14,15 +14,25 @@ ECHO Stopping NGINX Server..
 start C:\\RTMPServer\\nginx.exe -s stop
 """
 
+defaultconfig = """rtmp {
+        server {
+                listen 1935;
+                chunk_size 4096;
+
+                application live {
+                        live on;
+                        record off;
+                }
+        }
+}
+"""
 user = os.environ.get("USERNAME")
 startname = "C:\\Users\\" + user + "\\Desktop\\start.bat"
 stopname = "C:\\Users\\" + user + "\\Desktop\\stop.bat"
 
-if os.name == "nt":
-  DEFAULTDIR = "C:\\RTMPServer\\"
-elif os.name == "posix":
-  DEFAULTDIR = "/home/" + user + "/RTMPServer/"
-  print("currently, i didnt make a script for linux. i will do it soon!")
+debianpkgs = "build-essential libpcre3 libpcre3-dev libssl-dev wget" # Please pull a request if something wrong here
+
+
   
 
 def createbatch():
@@ -49,5 +59,43 @@ def downloadwin():
   elif i == "yes":
     print("Creating the batch file")
     createbatch()
-   
-downloadwin()
+
+def downloadposix():
+  # only debian or based for now
+  print("Updating package manager...")
+  try:
+   os.system("sudo apt update")
+   os.system("sudo apt install " + debianpkgs) 
+   os.system("wget http://nginx.org/download/nginx-1.15.1.tar.gz")
+   os.system("wget https://github.com/sergey-dryabzhinsky/nginx-rtmp-module/archive/dev.zip")
+   os.system("tar -zxvf nginx-1.15.1.tar.gz")
+   os.system("unzip dev.zip")
+   os.system("cd nginx-1.15.1")
+   os.system("./configure --with-http_ssl_module --add-module=../nginx-rtmp-module-dev")
+   os.system("make")
+   os.system("sudo make install")
+   with open("/usr/local/nginx/conf/nginx.conf", "a") as file:
+    file.write(defaultconfig)
+  except error:
+   print("error: " + error)
+   print("make sure you have all needed packages installed")
+  print("Installed RTMPServer!")
+  print("start with sudo /usr/local/nginx/sbin/nginx")
+  print("stop with sudo /usr/local/nginx/sbin/nginx -s stop")
+  print("server is configured to be running on http://localhost")
+  print("Closing in 5 seconds..")
+  time.sleep(5)
+  
+if os.name == "nt":
+  DEFAULTDIR = "C:\\RTMPServer\\"
+  downloadwin()
+elif os.name == "posix":
+  DEFAULTDIR = "/home/" + user + "/RTMPServer/"
+  print("only works in debian or debian based? because it uses APT Package manager..")
+  print("this may not working correctly, do you want to continue? [yes/no]")
+  j = input("--> ")
+  if j == "yes":
+   downloadposix()
+  elif j == "no":
+   print("ok")
+    
