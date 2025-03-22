@@ -1,3 +1,9 @@
+## RTMP Server
+## - Open-source RTMP Server and Installer
+## -- Copyrights - Horizon TV Studios
+## 
+## The Script is still in alpha, Do not expect it to work perfectly
+
 import os
 import time
 
