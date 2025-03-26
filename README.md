@@ -16,12 +16,12 @@ An open-source server and installer for hosting rtmp server with nginx
 - Android and IOS
 
 # How to use it
-After installing RTMPServer, run start.bat script or run nginx.exe
-after that open a streaming software that support rtmp (exemple: obs studio)
-set stream url to rtmp://localhost/live and set stream key to anything you want
-start the stream
-if you want to play the stream, make sure you have a player that support RTMP (exemple: VLC)
-play rtmp://localhost:8080/live/(stream key)
-and here we go, it should work 
-if it doesnt work, Please report to issues
-It may not work in first time, just keep trying
+- After installing RTMPServer, run start.bat script or run nginx.exe
+- after that open a streaming software that support rtmp (exemple: obs studio)
+- set stream url to rtmp://localhost/live and set stream key to anything you want
+- start the stream
+- if you want to play the stream, make sure you have a player that support RTMP (exemple: VLC)
+- play rtmp://localhost:8080/live/(stream key)
+- and here we go, it should work 
+- if it doesnt work, Please report to issues
+- It may not work in first time, just keep trying
