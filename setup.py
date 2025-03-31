@@ -1,25 +1,24 @@
-## RTMP Server
-## - Open-source RTMP Server and Installer
-## -- Copyrights - Horizon TV Studios
-## 
-## The Script is still in alpha, Do not expect it to work perfectly
-
 import os
 import time
+import sys
 
-startbatch = """@ECHO OFF
+# Themed colors for cool output
+RED = '\033[91m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+BLUE = '\033[94m'
+RESET = '\033[0m'
 
-ECHO Starting NGINX Server..
-ECHO Running in http://localhost:8080
-ECHO To stop the server, please execute stop.bat
-start C:\\RTMPServer\\nginx.exe
+# ASCII Logo
+LOGO = """
+   _____ _____ _____ _____ 
+  |     |  |  |   __|   __|
+  |  |  |  |  |   __|__   |
+  |_____|_____|_____|_____|
+       Horizon TV Studios
 """
-stopbatch = """@ECHO OFF
 
-ECHO Stopping NGINX Server..
-start C:\\RTMPServer\\nginx.exe -s stop
-"""
-
+# Default config for NGINX
 defaultconfig = """rtmp {
         server {
                 listen 1935;
@@ -32,76 +31,101 @@ defaultconfig = """rtmp {
         }
 }
 """
+
+# Paths for Windows
 user = os.environ.get("USERNAME")
-startname = "C:\\Users\\" + user + "\\Desktop\\start.bat"
-stopname = "C:\\Users\\" + user + "\\Desktop\\stop.bat"
+startname = f"C:\\Users\\{user}\\Desktop\\start.bat"
+stopname = f"C:\\Users\\{user}\\Desktop\\stop.bat"
 
-debianpkgs = "build-essential libpcre3 libpcre3-dev libssl-dev wget" # Please pull a request if something wrong here
+# Debian package dependencies
+debianpkgs = "build-essential libpcre3 libpcre3-dev libssl-dev wget"  # Add any missing packages here
 
+def print_banner():
+    print(BLUE + LOGO + RESET)
 
-  
+def create_batch_files():
+    print(GREEN + "[INFO] Creating batch files..." + RESET)
+    try:
+        with open(startname, "w") as file:
+            file.write(startbatch)
+        with open(stopname, "w") as file:
+            file.write(stopbatch)
+        print(GREEN + "[INFO] Batch files created on your Desktop!" + RESET)
+    except Exception as e:
+        print(RED + f"[ERROR] Failed to create batch files: {e}" + RESET)
 
-def createbatch():
-  with open(startname, "w") as file:
-    file.write(startbatch)
-  with open(stopname, "w") as file:
-    file.write(stopbatch)
-  
-def downloadwin():
-  print("Downloading nginx-rtmp-win32...")
-  try:
-    os.system("cd C:\\")
-    os.system("mkdir RTMPServer")
-    os.system("git clone https://github.com/illuspas/nginx-rtmp-win32.git C:\\RTMPServer")
-  except error:
-    print("error: " + error)
-    print("Tip: Make sure you have git installed! Download it here https://git-scm.com/downloads")
-  print("Last steps...")
-  print("Installed RTMPServer!")
-  print("Do you want a batch in your desktop to run the Nginx server? [yes/no]")
-  i = input("--> ")
-  if i == "no":
-    print("ok")
-  elif i == "yes":
-    print("Creating the batch file")
-    createbatch()
+# Windows Download and Setup
+def download_win():
+    print(YELLOW + "[INFO] Downloading nginx-rtmp-win32..." + RESET)
+    try:
+        os.system("cd C:\\")
+        os.system("mkdir RTMPServer")
+        os.system("git clone https://github.com/illuspas/nginx-rtmp-win32.git C:\\RTMPServer")
+    except Exception as error:
+        print(RED + f"[ERROR] {error}" + RESET)
+        print(YELLOW + "Tip: Make sure you have git installed! Download it here: https://git-scm.com/downloads" + RESET)
+        return
 
-def downloadposix():
-  # only debian or based for now
-  print("Updating package manager...")
-  try:
-   os.system("sudo apt update")
-   os.system("sudo apt install " + debianpkgs) 
-   os.system("wget http://nginx.org/download/nginx-1.15.1.tar.gz")
-   os.system("wget https://github.com/sergey-dryabzhinsky/nginx-rtmp-module/archive/dev.zip")
-   os.system("tar -zxvf nginx-1.15.1.tar.gz")
-   os.system("unzip dev.zip")
-   os.system("cd nginx-1.15.1")
-   os.system("./configure --with-http_ssl_module --add-module=../nginx-rtmp-module-dev")
-   os.system("make")
-   os.system("sudo make install")
-   with open("/usr/local/nginx/conf/nginx.conf", "a") as file:
-    file.write(defaultconfig)
-  except error:
-   print("error: " + error)
-   print("make sure you have all needed packages installed")
-  print("Installed RTMPServer!")
-  print("start with sudo /usr/local/nginx/sbin/nginx")
-  print("stop with sudo /usr/local/nginx/sbin/nginx -s stop")
-  print("server is configured to be running on http://localhost")
-  print("Closing in 5 seconds..")
-  time.sleep(5)
-  
-if os.name == "nt":
-  DEFAULTDIR = "C:\\RTMPServer\\"
-  downloadwin()
-elif os.name == "posix":
-  DEFAULTDIR = "/home/" + user + "/RTMPServer/"
-  print("only works in debian or debian based? because it uses APT Package manager..")
-  print("this may not working correctly, do you want to continue? [yes/no]")
-  j = input("--> ")
-  if j == "yes":
-   downloadposix()
-  elif j == "no":
-   print("ok")
+    print(GREEN + "[INFO] Last steps..." + RESET)
+    print(GREEN + "[INFO] Installed RTMPServer!" + RESET)
+    print("Do you want a batch file on your Desktop to run the Nginx server? [yes/no]")
+
+    i = input("--> ")
+    if i.lower() == "yes":
+        create_batch_files()
+    else:
+        print("No batch file created.")
+
+# Linux (Debian-based) Download and Setup
+def download_posix():
+    print(YELLOW + "[INFO] Updating package manager..." + RESET)
+    try:
+        os.system("sudo apt update")
+        os.system(f"sudo apt install {debianpkgs}")
+        os.system("wget http://nginx.org/download/nginx-1.15.1.tar.gz")
+        os.system("wget https://github.com/sergey-dryabzhinsky/nginx-rtmp-module/archive/dev.zip")
+        os.system("tar -zxvf nginx-1.15.1.tar.gz")
+        os.system("unzip dev.zip")
+        os.system("cd nginx-1.15.1")
+        os.system("./configure --with-http_ssl_module --add-module=../nginx-rtmp-module-dev")
+        os.system("make")
+        os.system("sudo make install")
+
+        with open("/usr/local/nginx/conf/nginx.conf", "a") as file:
+            file.write(defaultconfig)
+
+        print(GREEN + "[INFO] Installed RTMPServer!" + RESET)
+        print("Start with: sudo /usr/local/nginx/sbin/nginx")
+        print("Stop with: sudo /usr/local/nginx/sbin/nginx -s stop")
+        print("Server is configured to run on http://localhost")
+    except Exception as error:
+        print(RED + f"[ERROR] {error}" + RESET)
+        print(YELLOW + "Make sure you have all the needed packages installed." + RESET)
+
+    print("Closing in 5 seconds...")
+    time.sleep(5)
+
+# Start the installation process
+def start_installation():
+    print_banner()
     
+    if os.name == "nt":
+        print(GREEN + "[INFO] Windows system detected." + RESET)
+        download_win()
+    elif os.name == "posix":
+        print(GREEN + "[INFO] Linux (Debian-based) system detected." + RESET)
+        print("This script currently works for Debian or Debian-based distributions.")
+        print("Do you want to continue? [yes/no]")
+        
+        choice = input("--> ")
+        if choice.lower() == "yes":
+            download_posix()
+        else:
+            print("Exiting...")
+            sys.exit()
+    else:
+        print(RED + "[ERROR] Unsupported OS!" + RESET)
+        sys.exit()
+
+if __name__ == "__main__":
+    start_installation()
